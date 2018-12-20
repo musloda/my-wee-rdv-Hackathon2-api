@@ -21,7 +21,6 @@ function listEvents(auth) {
     calendar.events.list({
       calendarId: 'primary',
       timeMin: (new Date()).toISOString(),
-      maxResults: 10,
       singleEvents: true,
       orderBy: 'startTime',
     }, (err, res) => {
@@ -34,7 +33,6 @@ function listEvents(auth) {
     });
   });
 }
-
 app.get('/api/calendar/events', function (req, res) {
   Auth.getToken((token) => {
     listEvents(token)
