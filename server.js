@@ -2,10 +2,18 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const Auth = require('./autorisation');
+const configuration = require('./configrdv.js');
+const bodyParser = require('body-parser');
 const port = 3000;
 
 // api google calendar
 const {google} = require('googleapis');
+
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 
 app.use(cors())
 app.use((req, res, next) => {
@@ -44,6 +52,11 @@ app.get('/api/calendar/events', function (req, res) {
     })
   })
 });
+
+app.post('/contact', (req, res) => {
+  configuration(req.body);
+  res.status(200).send();
+})
 
 app.listen(port, (err) => {
   if (err) {
