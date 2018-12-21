@@ -7,7 +7,7 @@ const bodyParser = require('body-parser');
 const port = 3000;
 
 // api google calendar
-const {google} = require('googleapis');
+const { google } = require('googleapis');
 
 
 app.use(bodyParser.json());
@@ -16,16 +16,18 @@ app.use(bodyParser.urlencoded({
 }));
 
 app.use(cors())
+
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    next();
+  res.header('Access-Control-Allow-Origin', '*');
+  next();
 });
+
+const calendar = google.calendar({ version: 'v3' });
 
 // api calendrier
 function listEvents(auth) {
   return new Promise(function (resolve, reject) {
 
-    const calendar = google.calendar({ version: 'v3', auth });
     // addEvents(auth, calendar); // Add events
     calendar.events.list({
       calendarId: 'primary',
@@ -34,7 +36,7 @@ function listEvents(auth) {
       orderBy: 'startTime',
     }, (err, res) => {
       if (err) {
-        reject(err); 
+        reject(err);
         return;
       }
       resolve(res.data.items);
@@ -70,18 +72,41 @@ function listEvents(auth) {
 app.get('/api/calendar/events', function (req, res) {
   Auth.getToken((token) => {
     listEvents(token)
-    .then((events) => {
-      res.json(events);
-    })
-    .catch((err) => {
-      res.status(500).json(err);
-    })
+      .then((events) => {
+        res.json(events);
+      })
+      .catch((err) => {
+        res.status(500).json(err);
+      })
   })
 });
 
-app.post('/contact', (req, res) => {
-  configuration(req.body);
-  res.status(200).send();
+app.post('/contact', async (req, res) => {
+  Auth.getToken(async (token) => {
+    try {
+      const event = await calendar.events.insert({
+        auth: token,
+        calendarId: 'primary',
+        resource: {
+            summary: req.body.sujet,
+            description: 'Hackaton two',
+            start: {
+            dateTime: '2018-12-21T18:00:00Z',
+            // timeZone: 'GMT',
+          },
+          end: {
+            dateTime: '2018-12-21T19:00:00Z',
+            // timeZone: 'GMT',
+            },
+          },
+        bodyRequest: req.body
+      });
+      configuration(req.body);
+      res.status(200).json(event);
+    } catch (err) {
+      res.end(500).send(err.message);
+    }
+  })
 })
 
 app.listen(port, (err) => {
