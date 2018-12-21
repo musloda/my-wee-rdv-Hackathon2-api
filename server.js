@@ -26,6 +26,7 @@ function listEvents(auth) {
   return new Promise(function (resolve, reject) {
 
     const calendar = google.calendar({ version: 'v3', auth });
+    // addEvents(auth, calendar); // Add events
     calendar.events.list({
       calendarId: 'primary',
       timeMin: (new Date()).toISOString(),
@@ -41,6 +42,31 @@ function listEvents(auth) {
     });
   });
 }
+// Add events
+// function addEvents(auth, calendar){
+//   calendar.events.insert({
+//     auth: auth,
+//     calendarId: 'primary',
+//     resource: {
+//       'summary': 'formulaire.sujet',
+//       'description': 'Sample description',
+//       'start': {
+//         'dateTime': '2018-12-21T08:00:00',
+//         'timeZone': 'GMT',
+//       },
+//       'end': {
+//         'dateTime': '2018-12-21T09:00:00',
+//         'timeZone': 'GMT',
+//       },
+//     },
+//   }, function(err, res) {
+//     if (err) {
+//       console.log('Error: ' + err);
+//       return;
+//     }
+//     console.log(res);
+//   });
+// }
 app.get('/api/calendar/events', function (req, res) {
   Auth.getToken((token) => {
     listEvents(token)
